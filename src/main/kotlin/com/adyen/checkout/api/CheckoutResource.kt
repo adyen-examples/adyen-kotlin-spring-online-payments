@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.view.RedirectView
 import java.io.IOException
+import javax.servlet.http.HttpServletRequest
 import java.util.*
 
 /**
@@ -27,7 +28,6 @@ class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
     private val merchantAccount: String? = null
 
     private val checkout: Checkout
-    private val paymentDataStore = HashMap<String, String>()
 
     init {
         val client = Client(apiKey, Environment.TEST)
@@ -63,24 +63,29 @@ class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
      */
     @PostMapping("/initiatePayment")
     @Throws(IOException::class, ApiException::class)
-    fun payments(@RequestBody body: PaymentsRequest): ResponseEntity<PaymentsResponse> {
+    fun payments(@RequestBody body: PaymentsRequest, request: HttpServletRequest): ResponseEntity<PaymentsResponse> {
         val paymentRequest = PaymentsRequest()
-        paymentRequest.merchantAccount = merchantAccount
-        paymentRequest.channel = PaymentsRequest.ChannelEnum.WEB
+        paymentRequest.merchantAccount = merchantAccount // required
+        paymentRequest.channel = PaymentsRequest.ChannelEnum.WEB // required
 
         val amount = Amount()
                 .currency(findCurrency(body.paymentMethod.type))
-                .value(1000L)
+                .value(1000L)  // value is 10€ in minor units
         paymentRequest.amount = amount
 
         val orderRef = UUID.randomUUID().toString()
-        paymentRequest.reference = orderRef
+        paymentRequest.reference = orderRef // required
+        // required for 3ds2 redirect flow
         paymentRequest.returnUrl = "http://localhost:8080/api/handleShopperRedirect?orderRef=$orderRef"
-        paymentRequest.additionalData = Collections.singletonMap("allow3DS2", "true")
 
-        paymentRequest.paymentMethod = body.paymentMethod
+        // required for 3ds2 native flow
+        paymentRequest.additionalData = Collections.singletonMap("allow3DS2", "true")
+        paymentRequest.origin = "http://localhost:8080"
+        // required for 3ds2
         paymentRequest.browserInfo = body.browserInfo
-        paymentRequest.origin = body.origin
+        // required by some issuers for 3ds2
+        paymentRequest.shopperIP = request.remoteAddr
+        paymentRequest.paymentMethod = body.paymentMethod
 
         // required for Klarna
         if (body.paymentMethod.type.contains("klarna")) {
@@ -100,10 +105,6 @@ class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
 
         log.info("REST request to make Adyen payment {}", paymentRequest)
         val response = checkout.payments(paymentRequest)
-        if (response.action != null && response.action.paymentData.isNotEmpty()) {
-            // set payment data to local store for submitting details request on redirect
-            paymentDataStore[orderRef] = response.action.paymentData
-        }
         return ResponseEntity.ok()
                 .body(response)
     }
@@ -117,7 +118,7 @@ class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
      */
     @PostMapping("/submitAdditionalDetails")
     @Throws(IOException::class, ApiException::class)
-    fun payments(@RequestBody detailsRequest: PaymentsDetailsRequest?): ResponseEntity<PaymentsResponse> {
+    fun payments(@RequestBody detailsRequest: PaymentsDetailsRequest?): ResponseEntity<PaymentsDetailsResponse> {
         log.info("REST request to make Adyen payment details {}", detailsRequest)
         val response = checkout.paymentsDetails(detailsRequest)
         return ResponseEntity.ok()
@@ -135,31 +136,11 @@ class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
     @Throws(IOException::class, ApiException::class)
     fun redirect(@RequestParam(required = false) payload: String?, @RequestParam(required = false) redirectResult: String?, @RequestParam orderRef: String?): RedirectView {
         val detailsRequest = PaymentsDetailsRequest()
-        if (payload != null && payload.isNotEmpty()) {
-            detailsRequest.details = Collections.singletonMap("payload", payload)
-        } else if (redirectResult != null && redirectResult.isNotEmpty()) {
+        if (redirectResult != null && redirectResult.isNotEmpty()) {
             detailsRequest.details = Collections.singletonMap("redirectResult", redirectResult)
+        } else if (payload != null && payload.isNotEmpty()) {
+            detailsRequest.details = Collections.singletonMap("payload", payload)
         }
-        detailsRequest.paymentData = paymentDataStore[orderRef]
-        return getRedirectView(detailsRequest)
-    }
-
-    /**
-     * `POST  /handleShopperRedirect` : Handle redirect during payment.
-     *
-     * @return the [RedirectView] with status `302`
-     * @throws IOException  from Adyen API.
-     * @throws ApiException from Adyen API.
-     */
-    @PostMapping(path = ["/handleShopperRedirect"], consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    @Throws(IOException::class, ApiException::class)
-    fun redirect(payload: PaymentRedirectVM, @RequestParam orderRef: String?): RedirectView {
-        val detailsRequest = PaymentsDetailsRequest()
-        val details = HashMap<String, String>()
-        details["MD"] = payload.MD.orEmpty()
-        details["PaRes"] = payload.PaRes.orEmpty()
-        detailsRequest.details = details
-        detailsRequest.paymentData = paymentDataStore[orderRef]
         return getRedirectView(detailsRequest)
     }
 
