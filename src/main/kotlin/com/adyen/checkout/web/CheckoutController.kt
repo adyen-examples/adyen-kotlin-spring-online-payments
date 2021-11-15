@@ -35,4 +35,10 @@ class CheckoutController {
         model.addAttribute("type", type)
         return "result"
     }
+
+    @GetMapping("/redirect")
+    fun redirect(model: Model) : String {
+        model.addAttribute("clientKey", clientKey)
+        return "redirect"
+    }
 }
