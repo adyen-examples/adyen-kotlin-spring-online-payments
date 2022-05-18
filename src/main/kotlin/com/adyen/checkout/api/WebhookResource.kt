@@ -41,8 +41,8 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
         notificationRequest.notificationItems.forEach(
             Consumer { item: NotificationRequestItem ->
                 // We recommend validate HMAC signature in the webhooks for security reasons
-//                try {
-//                    if (HMACValidator().validateHMAC(item, hmacKey)) {
+                try {
+                    if (HMACValidator().validateHMAC(item, hmacKey)) {
                         log.info(
                             """
                                 Received webhook with event {} :
@@ -55,14 +55,14 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
                             item.additionalData["alias"],
                             item.pspReference
                         )
-//                    } else {
-                        // invalid HMAC signature: do not send [accepted] response
-//                        log.warn("Could not validate HMAC signature for incoming webhook message: {}", item)
-//                        throw RuntimeException("Invalid HMAC signature")
-//                    }
-//                } catch (e: SignatureException) {
-//                    log.error("Error while validating HMAC Key", e)
-//                }
+                    } else {
+//                         invalid HMAC signature: do not send [accepted] response
+                        log.warn("Could not validate HMAC signature for incoming webhook message: {}", item)
+                        throw RuntimeException("Invalid HMAC signature")
+                    }
+                } catch (e: SignatureException) {
+                    log.error("Error while validating HMAC Key", e)
+                }
             }
         )
 
