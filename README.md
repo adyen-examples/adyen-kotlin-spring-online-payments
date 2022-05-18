@@ -56,6 +56,7 @@ git clone https://github.com/adyen-examples/adyen-kotlin-spring-online-payments.
 export ADYEN_API_KEY=yourAdyenApiKey
 export ADYEN_MERCHANT_ACCOUNT=yourAdyenMerchantAccount
 export ADYEN_CLIENT_KEY=yourAdyenClientKey
+export ADYEN_HMAC_KEY=yourHmacKey
 ```
 
 On Windows CMD you can use below commands instead
@@ -64,6 +65,7 @@ On Windows CMD you can use below commands instead
 set ADYEN_API_KEY=yourAdyenApiKey
 set ADYEN_MERCHANT_ACCOUNT=yourAdyenMerchantAccount
 set ADYEN_CLIENT_KEY=yourAdyenClientKey
+set ADYEN_HMAC_KEY=yourHmacKey
 ```
 
 2. Start the server:
@@ -75,6 +77,32 @@ set ADYEN_CLIENT_KEY=yourAdyenClientKey
 3. Visit [http://localhost:8080/](http://localhost:8080/) to select an integration type.
 
 To try out integrations with test card numbers and payment method details, see [Test card numbers](https://docs.adyen.com/development-resources/test-cards/test-card-numbers).
+
+## Testing webhooks
+
+This demo provides a simple webhook integration at `/api/webhooks/notifications`. You will need to:
+
+* Make sure Adyen's server is able to reach you application
+* Define a standard webhook in your Customer Area
+
+
+### Making your server reachable
+
+Your application runs on the cloud: this is normally enough (your server accepts incoming requests)
+
+Your application runs on your local machine: you need to use a service like [ngrok](https://ngrok.com/) to "tunnel" the webhook notifications.
+
+Once you have set up ngrok, make sure to add the provided ngrok URL to the list of **Allowed Origins** in the “API Credentials" of your Customer Area.
+
+### Setting up a webhook
+
+* In the “Developers" -> “Webhooks" section create a new ‘Standard notification' webhook.
+* In “Additional Settings” section configure (if necessary) the additional data you want to receive (i.e. 'Payment Account Reference’).
+
+That's it! Every time you perform a payment method, your server will receive a notification from Adyen's server.
+
+You can find more information in the [Webhooks documentation](https://docs.adyen.com/development-resources/webhooks) and in [this blog post](https://www.adyen.com/blog/Integrating-webhooks-notifications-with-Adyen-Checkout).
+
 
 ## Contributing
 
