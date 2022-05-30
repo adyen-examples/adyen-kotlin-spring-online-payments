@@ -1,6 +1,6 @@
 package com.adyen.checkout
 
-import nz.net.ultraq.thymeleaf.LayoutDialect
+import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect
 import org.springframework.context.annotation.Bean
 
 @Bean
