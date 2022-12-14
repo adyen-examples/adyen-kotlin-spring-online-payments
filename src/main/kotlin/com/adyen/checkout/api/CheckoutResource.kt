@@ -8,13 +8,13 @@ import com.adyen.model.checkout.CreateCheckoutSessionResponse
 import com.adyen.model.checkout.LineItem
 import com.adyen.service.Checkout
 import com.adyen.service.exception.ApiException
+import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.io.IOException
 import java.util.*
-import javax.servlet.http.HttpServletRequest
 
 
 /**
