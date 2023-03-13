@@ -38,8 +38,8 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
      */
     @PostMapping("/webhooks/notifications")
     fun webhooks(@RequestBody notificationRequest: NotificationRequest): ResponseEntity<String> {
-	// JSON and HTTP POST notifications always contain a single NotificationRequestItem object
-	// See also https://docs.adyen.com/development-resources/webhooks/understand-notifications#notification-structure
+	    // JSON and HTTP POST notifications always contain a single NotificationRequestItem object
+	    // See also https://docs.adyen.com/development-resources/webhooks/understand-notifications#notification-structure
         notificationRequest.notificationItems.firstOrNull()?.let { item: NotificationRequestItem ->
             try {
                 // We always recommend validating HMAC signature in the webhooks for security reasons, see https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures
