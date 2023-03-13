@@ -41,15 +41,15 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
 	// JSON and HTTP POST notifications always contain a single NotificationRequestItem object
 	// See also https://docs.adyen.com/development-resources/webhooks/understand-notifications#notification-structure
         notificationRequest.notificationItems.firstOrNull()?.let { item: NotificationRequestItem ->
-            // We always recommend validating HMAC signature in the webhooks for security reasons, see https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures
             try {
+                // We always recommend validating HMAC signature in the webhooks for security reasons, see https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures
                 if (!HMACValidator().validateHMAC(item, hmacKey)) {
                     // Invalid HMAC signature: do not send [accepted] response
                     log.warn("Could not validate HMAC signature for incoming webhook message: {}", item)
                     throw RuntimeException("Invalid HMAC signature")
                 }
 
-                // Process the notification here
+                // Process the notification here, in this case we log it
                 log.info(
                     """
                         Received webhook with event {} :
@@ -62,6 +62,7 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
                     item.additionalData["alias"],
                     item.pspReference
                 )
+
                 // Notify the server that we've accepted the payload
                 return ResponseEntity.ok().body("[accepted]")
             } catch (e: SignatureException) {
