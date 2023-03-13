@@ -38,35 +38,38 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
      */
     @PostMapping("/webhooks/notifications")
     fun webhooks(@RequestBody notificationRequest: NotificationRequest): ResponseEntity<String> {
-        notificationRequest.notificationItems.forEach(
-            Consumer { item: NotificationRequestItem ->
-                // We recommend validate HMAC signature in the webhooks for security reasons
-                try {
-                    if (HMACValidator().validateHMAC(item, hmacKey)) {
-                        log.info(
-                            """
-                                Received webhook with event {} :
-                                Merchant Reference: {}
-                                Alias : {}
-                                PSP reference : {}
-                                """.trimIndent(),
-                            item.eventCode,
-                            item.merchantReference,
-                            item.additionalData["alias"],
-                            item.pspReference
-                        )
-                    } else {
-//                         invalid HMAC signature: do not send [accepted] response
-                        log.warn("Could not validate HMAC signature for incoming webhook message: {}", item)
-                        throw RuntimeException("Invalid HMAC signature")
-                    }
-                } catch (e: SignatureException) {
-                    log.error("Error while validating HMAC Key", e)
+	    // JSON and HTTP POST notifications always contain a single NotificationRequestItem object
+	    // See also https://docs.adyen.com/development-resources/webhooks/understand-notifications#notification-structure
+        notificationRequest.notificationItems.firstOrNull()?.let { item: NotificationRequestItem ->
+            try {
+                // We always recommend validating HMAC signature in the webhooks for security reasons, see https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures
+                if (!HMACValidator().validateHMAC(item, hmacKey)) {
+                    // Invalid HMAC signature: do not send [accepted] response
+                    log.warn("Could not validate HMAC signature for incoming webhook message: {}", item)
+                    throw RuntimeException("Invalid HMAC signature")
                 }
-            }
-        )
 
-        // Notifying the server we're accepting the payload
-        return ResponseEntity.ok().body("[accepted]")
+                // Process the notification here, in this case we log it
+                log.info(
+                    """
+                        Received webhook with event {} :
+                        Merchant Reference: {}
+                        Alias : {}
+                        PSP reference : {}
+                        """.trimIndent(),
+                    item.eventCode,
+                    item.merchantReference,
+                    item.additionalData["alias"],
+                    item.pspReference
+                )
+
+                // Notify the server that we've accepted the payload
+                return ResponseEntity.ok().body("[accepted]")
+            } catch (e: SignatureException) {
+                log.error("Error while validating HMAC Key", e)
+            }
+        }
+
+        return ResponseEntity.badRequest().body("[invalid request]")
     }
 }
