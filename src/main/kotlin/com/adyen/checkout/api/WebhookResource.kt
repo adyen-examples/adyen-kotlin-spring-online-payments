@@ -38,35 +38,37 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
      */
     @PostMapping("/webhooks/notifications")
     fun webhooks(@RequestBody notificationRequest: NotificationRequest): ResponseEntity<String> {
-	// JSON and HTTP POST notifications always contain a single NotificationRequestItem object, see https://docs.adyen.com/development-resources/webhooks/understand-notifications#notification-structure
+	// JSON and HTTP POST notifications always contain a single NotificationRequestItem object
+	// See also https://docs.adyen.com/development-resources/webhooks/understand-notifications#notification-structure
         notificationRequest.notificationItems.firstOrNull()?.let { item: NotificationRequestItem ->
             // We always recommend validating HMAC signature in the webhooks for security reasons, see https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures
             try {
-                if (HMACValidator().validateHMAC(item, hmacKey)) {
-                    log.info(
-                        """
-                            Received webhook with event {} :
-                            Merchant Reference: {}
-                            Alias : {}
-                            PSP reference : {}
-                            """.trimIndent(),
-                        item.eventCode,
-                        item.merchantReference,
-                        item.additionalData["alias"],
-                        item.pspReference
-                    )
-                } else {
+                if (!HMACValidator().validateHMAC(item, hmacKey)) {
                     // Invalid HMAC signature: do not send [accepted] response
                     log.warn("Could not validate HMAC signature for incoming webhook message: {}", item)
                     throw RuntimeException("Invalid HMAC signature")
                 }
+
+                // Process the notification here
+                log.info(
+                    """
+                        Received webhook with event {} :
+                        Merchant Reference: {}
+                        Alias : {}
+                        PSP reference : {}
+                        """.trimIndent(),
+                    item.eventCode,
+                    item.merchantReference,
+                    item.additionalData["alias"],
+                    item.pspReference
+                )
+                // Notify the server that we've accepted the payload
+                return ResponseEntity.ok().body("[accepted]")
             } catch (e: SignatureException) {
                 log.error("Error while validating HMAC Key", e)
             }
         }
-        
 
-        // Notifying the server that we've accepted the payload
-        return ResponseEntity.ok().body("[accepted]")
+        return ResponseEntity.badRequest().body("[invalid request]")
     }
 }
