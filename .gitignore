@@ -5,6 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 env.tmp
+application-dev.properties
 
 ### STS ###
 .apt_generated
