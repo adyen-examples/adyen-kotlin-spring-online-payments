@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id("org.springframework.boot") version "3.0.4"
+	id("org.springframework.boot") version "3.1.0"
 	id("io.spring.dependency-management") version "1.1.0"
 	kotlin("jvm") version "1.8.22"
-	kotlin("plugin.spring") version "1.8.10"
+	kotlin("plugin.spring") version "1.8.22"
 }
 
 group = "com.adyen"
@@ -22,7 +22,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
-	implementation("com.adyen:adyen-java-api-library:18.1.3")
+	implementation("com.adyen:adyen-java-api-library:20.1.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
