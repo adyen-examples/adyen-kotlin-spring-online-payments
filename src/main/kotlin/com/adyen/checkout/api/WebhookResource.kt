@@ -6,13 +6,13 @@ import com.adyen.util.HMACValidator
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.security.SignatureException
-import java.util.function.Consumer
 
 /**
  * REST controller for receiving Adyen webhook notifications
@@ -44,7 +44,7 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
             try {
                 // We always recommend validating HMAC signature in the webhooks for security reasons, see https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures
                 if (!HMACValidator().validateHMAC(item, hmacKey)) {
-                    // Invalid HMAC signature: do not send [accepted] response
+                    // Invalid HMAC signature
                     log.warn("Could not validate HMAC signature for incoming webhook message: {}", item)
                     throw RuntimeException("Invalid HMAC signature")
                 }
@@ -63,8 +63,9 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
                     item.pspReference
                 )
 
-                // Notify the server that we've accepted the payload
-                return ResponseEntity.ok().body("[accepted]")
+                // Acknowledge event has been consumed
+                return ResponseEntity.status(HttpStatus.ACCEPTED).build()
+
             } catch (e: SignatureException) {
                 log.error("Error while validating HMAC Key", e)
             }
