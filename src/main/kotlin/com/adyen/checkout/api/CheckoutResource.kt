@@ -2,11 +2,11 @@ package com.adyen.checkout.api
 
 import com.adyen.Client
 import com.adyen.enums.Environment
-import com.adyen.model.Amount
+import com.adyen.model.checkout.Amount
 import com.adyen.model.checkout.CreateCheckoutSessionRequest
 import com.adyen.model.checkout.CreateCheckoutSessionResponse
 import com.adyen.model.checkout.LineItem
-import com.adyen.service.Checkout
+import com.adyen.service.checkout.PaymentsApi;
 import com.adyen.service.exception.ApiException
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
@@ -28,11 +28,11 @@ class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
     @Value("\${ADYEN_MERCHANT_ACCOUNT}")
     private val merchantAccount: String? = null
 
-    private val checkout: Checkout
+    private val paymentsApi: PaymentsApi
 
     init {
         val client = Client(apiKey, Environment.TEST)
-        checkout = Checkout(client)
+        paymentsApi = PaymentsApi(client)
     }
 
     @PostMapping("/sessions")
@@ -57,7 +57,7 @@ class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
         )
 
         log.info("REST request to create Adyen Payment Session {}", checkoutSession)
-        val response = checkout.sessions(checkoutSession)
+        val response = paymentsApi.sessions(checkoutSession)
         return ResponseEntity.ok().body(response)
     }
 }

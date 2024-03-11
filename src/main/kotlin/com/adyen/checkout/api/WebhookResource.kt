@@ -37,8 +37,12 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
      * @return
      */
     @PostMapping("/webhooks/notifications")
-    fun webhooks(@RequestBody notificationRequest: NotificationRequest): ResponseEntity<String> {
-	    // JSON and HTTP POST notifications always contain a single NotificationRequestItem object
+    fun webhooks(@RequestBody json: String): ResponseEntity<String> {
+
+        // from JSON string to object
+        val notificationRequest = NotificationRequest.fromJson(json)
+
+        // JSON and HTTP POST notifications always contain a single NotificationRequestItem object
 	    // See also https://docs.adyen.com/development-resources/webhooks/understand-notifications#notification-structure
         notificationRequest.notificationItems.firstOrNull()?.let { item: NotificationRequestItem ->
             try {
