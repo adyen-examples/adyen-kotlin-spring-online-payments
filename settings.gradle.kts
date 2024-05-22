@@ -1,1 +1,1 @@
-rootProject.name = "checkout"
+rootProject.name = "adyen-kotlin-spring-online-payments"
