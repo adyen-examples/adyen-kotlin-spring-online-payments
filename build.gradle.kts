@@ -22,7 +22,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
-	implementation("com.adyen:adyen-java-api-library:28.3.1")
+	implementation("com.adyen:adyen-java-api-library:31.0.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
