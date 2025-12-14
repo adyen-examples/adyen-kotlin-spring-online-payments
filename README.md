@@ -1,5 +1,8 @@
 # Adyen [online payment](https://docs.adyen.com/checkout) integration demos
 
+[![Kotlin Build](https://github.com/adyen-examples/adyen-kotlin-spring-online-payments/actions/workflows/build.yml/badge.svg)](https://github.com/adyen-examples/adyen-kotlin-spring-online-payments/actions/workflows/build.yml) 
+[![E2E (Playwright)](https://github.com/adyen-examples/adyen-kotlin-spring-online-payments/actions/workflows/e2e.yml/badge.svg)](https://github.com/adyen-examples/adyen-kotlin-spring-online-payments/actions/workflows/e2e.yml)
+
 ## Details
 
 This repository includes examples of PCI-compliant UI integrations for online payments with Adyen. Within this demo app, you'll find a simplified version of an e-commerce website, complete with commented code to highlight key features and concepts of Adyen's API. Check out the underlying code to see how you can integrate Adyen to give your shoppers the option to pay with their preferred payment methods, all in a seamless checkout experience.
@@ -28,6 +31,13 @@ The Demo leverages Adyen's API Library for Java ([GitHub](https://github.com/Ady
 -   Java 17
 -   Kotlin 1.3
 -   Network access to maven central
+
+Run with GitHub Codespaces
+This repository is configured to work with GitHub Codespaces. Click the badge below to launch a Codespace with all dependencies pre-installed.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/adyen-examples/adyen-kotlin-online-payments?ref=main&devcontainer_path=.devcontainer%2Fdevcontainer.json)
+
+For detailed setup instructions, see the [GitHub Codespaces Instructions](https://github.com/adyen-examples/.github/blob/main/pages/codespaces-instructions.md).
 
 ## Installation
 

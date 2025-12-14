@@ -1,0 +1,20 @@
+{
+    "name": "Adyen Kotlin Spring Online Payments",
+    "image": "mcr.microsoft.com/devcontainers/java:17-bullseye",
+    "hostRequirements": {
+        "cpus": 4
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/gradle:1": {
+            "version": "latest"
+        }
+    },
+    "postCreateCommand": "./gradlew bootJar",
+    "postAttachCommand": "bash .devcontainer/setup.sh",
+    "portsAttributes": {
+        "8080": {
+            "label": "Adyen Kotlin Spring Online Payments",
+            "onForward": "notify"
+        }
+    }
+}
