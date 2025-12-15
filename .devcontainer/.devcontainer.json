@@ -9,6 +9,9 @@
             "version": "latest"
         }
     },
+    "containerEnv": {
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
+    },
     "postCreateCommand": "./gradlew bootJar",
     "postAttachCommand": "bash .devcontainer/setup.sh",
     "portsAttributes": {

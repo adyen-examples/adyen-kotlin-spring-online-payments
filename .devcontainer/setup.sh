@@ -3,7 +3,7 @@
 
 set -eo pipefail
 
-echo ".gradlew run complete"
+echo "Set up Adyen Kotlin Spring Online Payments development environment"
 
 echo "Before running the server, create a .env file in the project directory:"
 echo "   cp .env.example .env"
