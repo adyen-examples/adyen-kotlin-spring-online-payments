@@ -9,7 +9,7 @@
             "version": "latest"
         }
     },
-    "postCreateCommand": "./gradlew -Dorg.gradle.java.home=\"$JAVA_HOME\" bootJar",
+    "postCreateCommand": "./gradlew bootJar",
     "postAttachCommand": "bash .devcontainer/setup.sh",
     "portsAttributes": {
         "8080": {
