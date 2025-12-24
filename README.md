@@ -32,8 +32,32 @@ The Demo leverages Adyen's API Library for Java ([GitHub](https://github.com/Ady
 -   Kotlin 1.3
 -   Network access to maven central
 
-Run with GitHub Codespaces
-This repository is configured to work with GitHub Codespaces. Click the badge below to launch a Codespace with all dependencies pre-installed.
+This repository is configured to work with [GitHub Codespaces](https://github.com/features/codespaces). Each example can be opened in its own Codespace with all dependencies pre-installed.
+
+For detailed setup instructions, see the [GitHub Codespaces Instructions](https://github.com/adyen-examples/.github/blob/main/pages/codespaces-instructions.md).
+
+### Prerequisites
+
+Before running any example, you'll need to set up the following environment variables in your Codespace:
+
+- `ADYEN_API_KEY` - [Your Adyen API key](https://docs.adyen.com/user-management/how-to-get-the-api-key)
+- `ADYEN_CLIENT_KEY` - [Your Adyen client key ](https://docs.adyen.com/user-management/client-side-authentication) 
+- `ADYEN_MERCHANT_ACCOUNT` - [Your Adyen merchant account](https://docs.adyen.com/account/account-structure)
+- `ADYEN_HMAC_KEY` - [Your Adyen HMAC key for webhook validation](https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures) (optional)
+
+### Setting Environment Variables
+
+1. Go to [Codespaces settings](https://github.com/settings/codespaces)
+2. Under Secrets, Click on "New secret"
+4. Add the required environment variables and repo access
+5. Restart your Codespace
+
+Alternatively, you can set them in the terminal after starting Codespaces:
+```bash
+export ADYEN_API_KEY="your_adyen_api_key"
+export ADYEN_CLIENT_KEY="your_adyen_client_key"
+export ADYEN_MERCHANT_ACCOUNT="your_adyen_merchant_account"
+```
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/adyen-examples/adyen-kotlin-online-payments?ref=main&devcontainer_path=.devcontainer%2Fdevcontainer.json)
 

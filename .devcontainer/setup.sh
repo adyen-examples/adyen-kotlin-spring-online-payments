@@ -37,7 +37,7 @@ echo "   ./gradlew bootRun"
 echo ""
 echo "Visit http://localhost:8080 to see the application running."
 
-# Show missing variables warning at the very bottom (after any stacktraces)
+
 if [ ${#missing_vars[@]} -gt 0 ]; then
     echo ""
     echo "⚠️  Missing required environment variables:"
