@@ -1,6 +1,7 @@
 package com.adyen.checkout.api
 
 import com.adyen.Client
+import com.adyen.checkout.AdyenConfig
 import com.adyen.enums.Environment
 import com.adyen.model.checkout.Amount
 import com.adyen.model.checkout.CreateCheckoutSessionRequest
@@ -10,7 +11,7 @@ import com.adyen.service.checkout.PaymentsApi;
 import com.adyen.service.exception.ApiException
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.io.IOException
@@ -22,22 +23,34 @@ import java.util.*
  */
 @RestController
 @RequestMapping("/api")
-class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
+class CheckoutResource @Autowired constructor(private val adyenConfig: AdyenConfig) {
     private val log = LoggerFactory.getLogger(CheckoutResource::class.java)
 
-    @Value("\${ADYEN_MERCHANT_ACCOUNT}")
-    private val merchantAccount: String? = null
-
-    private val paymentsApi: PaymentsApi
-
-    init {
-        val client = Client(apiKey, Environment.TEST)
-        paymentsApi = PaymentsApi(client)
+    private val paymentsApi: PaymentsApi? by lazy {
+        val apiKey = adyenConfig.apiKey
+        if (apiKey.isNullOrBlank()) {
+            log.warn("ADYEN_API_KEY is not configured. Checkout API will not be available.")
+            null
+        } else {
+            val client = Client(apiKey, Environment.TEST)
+            PaymentsApi(client)
+        }
     }
 
     @PostMapping("/sessions")
     @Throws(IOException::class, ApiException::class)
     fun sessions(@RequestHeader host: String, @RequestParam type: String?, request: HttpServletRequest): ResponseEntity<CreateCheckoutSessionResponse> {
+        val api = paymentsApi
+        if (api == null) {
+            log.error("ADYEN_API_KEY is not configured. Cannot create checkout session.")
+            return ResponseEntity.status(500).build()
+        }
+
+        val merchantAccount = adyenConfig.merchantAccount
+        if (merchantAccount.isNullOrBlank()) {
+            log.error("ADYEN_MERCHANT_ACCOUNT is not configured. Cannot create checkout session.")
+            return ResponseEntity.status(500).build()
+        }
 
         val orderRef = UUID.randomUUID().toString()
         val amount = Amount()
@@ -57,7 +70,7 @@ class CheckoutResource(@Value("\${ADYEN_API_KEY}") apiKey: String?) {
         )
 
         log.info("REST request to create Adyen Payment Session {}", checkoutSession)
-        val response = paymentsApi.sessions(checkoutSession)
+        val response = api.sessions(checkoutSession)
         return ResponseEntity.ok().body(response)
     }
 }
