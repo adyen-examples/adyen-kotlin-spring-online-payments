@@ -1,6 +1,7 @@
 package com.adyen.checkout.web
 
-import org.springframework.beans.factory.annotation.Value
+import com.adyen.checkout.AdyenConfig
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -8,9 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 
 @Controller
-class CheckoutController {
-    @Value("\${ADYEN_CLIENT_KEY}")
-    private val clientKey: String? = null
+class CheckoutController @Autowired constructor(private val adyenConfig: AdyenConfig) {
+    private val clientKey: String?
+        get() = adyenConfig.clientKey
 
     @GetMapping("/")
     fun index(): String {
