@@ -1,11 +1,11 @@
 package com.adyen.checkout.api
 
+import com.adyen.checkout.AdyenConfig
 import com.adyen.model.notification.NotificationRequest
 import com.adyen.model.notification.NotificationRequestItem
 import com.adyen.util.HMACValidator
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -19,15 +19,15 @@ import java.security.SignatureException
  */
 @RestController
 @RequestMapping("/api")
-class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: String?) {
+class WebhookResource @Autowired constructor(private val adyenConfig: AdyenConfig) {
     private val log = LoggerFactory.getLogger(WebhookResource::class.java)
 
-    private val hmacKey : String? = key
+    private val hmacKey: String?
+        get() = adyenConfig.hmacKey
 
     init {
-        if (hmacKey == null) {
+        if (hmacKey.isNullOrBlank()) {
             log.warn("ADYEN_HMAC_KEY is UNDEFINED (Webhook cannot be authenticated)")
-            throw RuntimeException("ADYEN_HMAC_KEY is UNDEFINED")
         }
     }
 
@@ -47,7 +47,10 @@ class WebhookResource @Autowired constructor(@Value("\${ADYEN_HMAC_KEY}") key: S
         notificationRequest.notificationItems.firstOrNull()?.let { item: NotificationRequestItem ->
             try {
                 // We always recommend validating HMAC signature in the webhooks for security reasons, see https://docs.adyen.com/development-resources/webhooks/verify-hmac-signatures
-                if (!HMACValidator().validateHMAC(item, hmacKey)) {
+                val key = hmacKey
+                if (key.isNullOrBlank()) {
+                    log.warn("ADYEN_HMAC_KEY is not configured. Skipping HMAC validation for webhook: {}", item)
+                } else if (!HMACValidator().validateHMAC(item, key)) {
                     // Invalid HMAC signature
                     log.warn("Could not validate HMAC signature for incoming webhook message: {}", item)
                     throw RuntimeException("Invalid HMAC signature")
