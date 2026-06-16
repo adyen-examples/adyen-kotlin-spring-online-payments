@@ -36,7 +36,7 @@ class CheckoutResource @Autowired constructor(private val adyenConfig: AdyenConf
             val config = Config()
             config.apiKey = apiKey
             config.environment = Environment.TEST
-            config.applicationName = "adyen-kotlin-spring-online-payments"
+            config.applicationName = "[adyen-kotlin-spring-online-payments checkout-example adyen-web/5.68.0]"
             val client = Client(config)
             PaymentsApi(client)
         }
