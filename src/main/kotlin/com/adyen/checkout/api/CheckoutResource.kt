@@ -1,6 +1,7 @@
 package com.adyen.checkout.api
 
 import com.adyen.Client
+import com.adyen.Config
 import com.adyen.checkout.AdyenConfig
 import com.adyen.enums.Environment
 import com.adyen.model.checkout.Amount
@@ -32,7 +33,11 @@ class CheckoutResource @Autowired constructor(private val adyenConfig: AdyenConf
             log.warn("ADYEN_API_KEY is not configured. Checkout API will not be available.")
             null
         } else {
-            val client = Client(apiKey, Environment.TEST)
+            val config = Config()
+            config.apiKey = apiKey
+            config.environment = Environment.TEST
+            config.applicationName = "adyen-kotlin-spring-online-payments"
+            val client = Client(config)
             PaymentsApi(client)
         }
     }
